@@ -45,7 +45,7 @@ changerDeVille.addEventListener('click', () => {
 });
 
 function erreur() {
-    villeChoisie = "Saint-Saulve";
+    villeChoisie = "Paris";
     recevoirTemperature(villeChoisie);
 }
 
