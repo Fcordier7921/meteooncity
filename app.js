@@ -1,37 +1,76 @@
-let btn = document.querySelector('#changer');
-let ville = document.querySelector('#ville');
-let température = document.querySelector('#temperature_label');
+let villeChoisie;
 
-let villeDefaut = 'paris';
-apiMeteo(villeDefaut);
+if ("geolocation" in navigator) {
+    navigator.geolocation.watchPosition((position) => {
 
-btn.addEventListener('click', () => {
+        const url = 'https://api.openweathermap.org/data/2.5/weather?lat=' +
+            position.coords.latitude + '&lon=' +
+            position.coords.longitude + '&appid=dc8c9152e8adaad0ec8bf635818c0d42&units=metric';
 
-    let changeVille = prompt('Entré le nom de la ville !');
-    villeDefaut = changeVille.replaceAll(' ', '-');
-    console.log(villeDefaut);
-    apiMeteo(villeDefaut);
+        let requete = new XMLHttpRequest(); // Nous créons un objet qui nous permettra de faire des requêtes
+        requete.open('GET', url); // Nous récupérons juste des données
+        requete.responseType = 'json'; // Nous attendons du JSON
+        requete.send(); // Nous envoyons notre requête
 
-
-
-})
-
-function apiMeteo(villeDefaut) {
-    let url = "https://api.openweathermap.org/data/2.5/weather?q=" + villeDefaut + "&appid=66fef5e558f25f18da4839afa6a52ee9&units=metric";
-    fetch(url) //fetch en premier argumetnl'url de l'api qui retoune un promesse
-        .then(reponse => reponse.json()) //on utilise json retour une promesse des donné
-        .then(data => { //on retrouve nos donné
-
-            if (data.message === "city not found") {
-                alert("Un probléme et intervenue, la ville non trouver! " +
-                    "revener plutard")
-            } else {
-                let VilleChoisie = data.name
-                let tempVille = data.main.temp
-                ville.textContent = VilleChoisie;
-                température.textContent = tempVille;
+        // Dès qu'on reçoit une réponse, cette fonction est executée
+        requete.onload = function() {
+            if (requete.readyState === XMLHttpRequest.DONE) {
+                if (requete.status === 200) {
+                    let reponse = requete.response;
+                    // console.log(reponse);
+                    let temperature = reponse.main.temp;
+                    let ville = reponse.name;
+                    // console.log(temperature);
+                    document.querySelector('#temperature_label').textContent = temperature;
+                    document.querySelector('#ville').textContent = ville;
+                } else {
+                    alert('Un problème est intervenu, merci de revenir plus tard.');
+                }
             }
+        }
+    }, erreur, options);
 
+    var options = {
+        enableHighAccuracy: true
+    }
+} else {
+    villeChoisie = "saint-saulve";
+    recevoirTemperature(villeChoisie);
+}
 
-        })
+let changerDeVille = document.querySelector('#changer');
+changerDeVille.addEventListener('click', () => {
+    villeChoisie = prompt('Quelle ville souhaitez-vous voir ?');
+    recevoirTemperature(villeChoisie);
+});
+
+function erreur() {
+    villeChoisie = "Saint-Saulve";
+    recevoirTemperature(villeChoisie);
+}
+
+function recevoirTemperature(ville) {
+    const url = 'https://api.openweathermap.org/data/2.5/weather?q=' + ville + '&appid=dc8c9152e8adaad0ec8bf635818c0d42&units=metric';
+
+    let requete = new XMLHttpRequest(); // Nous créons un objet qui nous permettra de faire des requêtes
+    requete.open('GET', url); // Nous récupérons juste des données
+    requete.responseType = 'json'; // Nous attendons du JSON
+    requete.send(); // Nous envoyons notre requête
+
+    // Dès qu'on reçoit une réponse, cette fonction est executée
+    requete.onload = function() {
+        if (requete.readyState === XMLHttpRequest.DONE) {
+            if (requete.status === 200) {
+                let reponse = requete.response;
+                // console.log(reponse);
+                let temperature = reponse.main.temp;
+                let ville = reponse.name;
+                // console.log(temperature);
+                document.querySelector('#temperature_label').textContent = temperature;
+                document.querySelector('#ville').textContent = ville;
+            } else {
+                alert('Un problème est intervenu, merci de revenir plus tard.');
+            }
+        }
+    }
 }
